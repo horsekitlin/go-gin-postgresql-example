@@ -1,0 +1,13 @@
+###
+GET http://admin:secret@localhost:8080/resource
+Accept: application/json
+
+###
+POST http://admin:secret@localhost:8080/login
+Content-Type: application/json
+
+###
+GET http://0.0.0.0:8080/home
+Authorization: Bearer 6a12740f2eaa0d094c03ef60d401bf66b026abfa
+
+###

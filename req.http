@@ -6,8 +6,17 @@ Accept: application/json
 POST http://admin:secret@localhost:8080/login
 Content-Type: application/json
 
+{
+    "account": "Tomas",
+    "password": "123456"
+}
+
 ###
 GET http://0.0.0.0:8080/home
-Authorization: Bearer 6a12740f2eaa0d094c03ef60d401bf66b026abfa
+Authorization: Bearer 6282a844d5a3dcea7b49c2ec8252af9ba9edc4ba
+
+###
+GET http://0.0.0.0:8080/member/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiVG9tYXMiLCJyb2xlIjoiTWVtYmVyIiwiYXVkIjoiVG9tYXMiLCJleHAiOjE3MDk3MzA3MTEsImp0aSI6IlRvbWFzMTcwOTcyODcxMSIsImlhdCI6MTcwOTcyODcxMSwiaXNzIjoiZ2luSldUIiwibmJmIjoxNzA5NzI4NzEyLCJzdWIiOiJUb21hcyJ9.SORSuPKmSNESnisBhANe3MH3yzgkrCD2FKFrnK3mUWM
 
 ###

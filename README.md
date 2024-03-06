@@ -14,6 +14,8 @@
 
 [gorm-Migration](https://gorm.io/docs/migration.html)
 
+[gorm-Model](https://gorm.io/docs/models.html)
+
 [Atlas Integration](https://atlasgo.io/)
 
 [Atlas Versioned Migrations](https://atlasgo.io/concepts/declarative-vs-versioned#versioned-migrations)

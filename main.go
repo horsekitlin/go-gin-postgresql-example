@@ -69,7 +69,7 @@ func main() {
 	// defer db.Close()
 
 	// Perform database migration
-	// err = db.AutoMigrate(&User{})
+	err = db.AutoMigrate(&User{})
 	if err != nil {
 		log.Fatal(err)
 	}

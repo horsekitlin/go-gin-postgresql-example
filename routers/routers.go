@@ -7,11 +7,30 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/horsekitlin/go-gin-postgresql-example/routers/api"
 	v1 "github.com/horsekitlin/go-gin-postgresql-example/routers/api/v1"
 )
 
-var tokens []string
+var (
+	tokens []string
+	i      interface{}
+)
+
+func convert(i interface{}) {
+	switch t := i.(type) {
+	case int:
+		println("i is interger", t)
+	case string:
+		println("i is string", t)
+	case float64:
+		println("i is float64", t)
+	default:
+		println("type not found")
+	}
+}
+
+// var tokens []string
 
 // jwt secret key
 var jwtSecret = []byte("secret")
@@ -75,7 +94,53 @@ func AuthRequired(context *gin.Context) {
 	}
 }
 
+func SocketHandler(c *gin.Context) {
+	upGrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		closeSocketErr := ws.Close()
+		if closeSocketErr != nil {
+			panic(err)
+		}
+	}()
+
+	for {
+		msgType, msg, err := ws.ReadMessage()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Message Type: %d, Message: %s\n", msgType, string(msg))
+		err = ws.WriteJSON(struct {
+			Reply string `json:"reply"`
+		}{
+			Reply: "Echo...",
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func InitRouter() *gin.Engine {
+	i = 100
+	convert(i)
+	i = float64(45.55)
+	convert(i)
+	i = "foo"
+	convert(i)
+	convert(float32(10.0))
+
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -86,11 +151,14 @@ func InitRouter() *gin.Engine {
 		"admin": "secret",
 	}), api.GetResource)
 	router.POST("/login", api.GetAuth)
+	public := router.Group("/socket")
+	public.GET("", SocketHandler)
 
 	apiv1 := router.Group("/api/v1")
 	apiv1.Use(AuthRequired)
 	{
 		apiv1.GET("/member/profile", v1.GetProfile)
 	}
+
 	return router
 }

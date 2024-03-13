@@ -12,12 +12,16 @@ table "users" {
     null = true
     type = text
   }
+  column "created_at" {
+    null = false
+    type = 
+  }
   primary_key {
     columns = [column.id]
   }
-  index "uni_users_username" {
+  index "uni_users_email" {
     unique  = true
-    columns = [column.username]
+    columns = [column.email]
   }
 }
 schema "public" {

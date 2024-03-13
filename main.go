@@ -1,109 +1,39 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"log"
+	"net/http"
 
+	"github.com/horsekitlin/go-gin-postgresql-example/conf"
+	"github.com/horsekitlin/go-gin-postgresql-example/models"
 	"github.com/horsekitlin/go-gin-postgresql-example/routers"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/spf13/viper"
 )
 
-type User struct {
-	ID       uint   `gorm:"primaryKey"`
-	Username string `gorm:"unique"`
-	Email    string
-}
+func init() {
 
-func connectToPostgreSQL() (*gorm.DB, error) {
-	dsn := "user=postgres password=1234 dbname=postgres host=localhost port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
+	viper.SetConfigType("json") // 設置配置文件的類型
+
+	if err := viper.ReadConfig(bytes.NewBuffer(conf.AppJsonConfig)); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+			log.Println("no such config file")
+		} else {
+			// Config file was found but another error was produced
+			log.Println("read config error")
+		}
+		log.Fatal(err) // 讀取配置文件失敗致命錯誤
 	}
 
-	return db, nil
-}
-
-func createUser(db *gorm.DB, user *User) error {
-	result := db.Create(user)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-
-func getUserByID(db *gorm.DB, userID uint) (*User, error) {
-	var user User
-	result := db.First(&user, userID)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
-func updateUser(db *gorm.DB, user *User) error {
-	result := db.Save(user)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-
-func deleteUser(db *gorm.DB, user *User) error {
-	result := db.Delete(user)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
+	models.InitDB()
 }
 
 func main() {
 	routersInit := routers.InitRouter()
-	endPoint := fmt.Sprintf(":%d", 8888)
+	port := viper.GetString(`app.port`)
 
-	db, err := connectToPostgreSQL()
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer db.Close()
+	log.Println("監聽端口", "http://127.0.0.1:"+port)
 
-	// Perform database migration
-	err = db.AutoMigrate(&User{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create a user
-	newUser := &User{Username: "john_doe", Email: "john.doe@example.com"}
-	err = createUser(db, newUser)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Created User:", newUser)
-
-	// Query user by ID
-	userID := newUser.ID
-	user, err := getUserByID(db, userID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("User by ID:", user)
-
-	// Update user
-	user.Email = "updated_email@example.com"
-	err = updateUser(db, user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Updated User:", user)
-
-	// Delete user
-	err = deleteUser(db, user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Deleted User:", user)
-
-	routersInit.Run(endPoint)
+	http.ListenAndServe(":"+port, routersInit)
 }

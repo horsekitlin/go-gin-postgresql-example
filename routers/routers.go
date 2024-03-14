@@ -10,25 +10,13 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/horsekitlin/go-gin-postgresql-example/routers/api"
 	v1 "github.com/horsekitlin/go-gin-postgresql-example/routers/api/v1"
+	"github.com/horsekitlin/go-gin-postgresql-example/ws/primary"
 )
 
 var (
 	tokens []string
 	i      interface{}
 )
-
-func convert(i interface{}) {
-	switch t := i.(type) {
-	case int:
-		println("i is interger", t)
-	case string:
-		println("i is string", t)
-	case float64:
-		println("i is float64", t)
-	default:
-		println("type not found")
-	}
-}
 
 // var tokens []string
 
@@ -133,14 +121,6 @@ func SocketHandler(c *gin.Context) {
 }
 
 func InitRouter() *gin.Engine {
-	i = 100
-	convert(i)
-	i = float64(45.55)
-	convert(i)
-	i = "foo"
-	convert(i)
-	convert(float32(10.0))
-
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -151,8 +131,8 @@ func InitRouter() *gin.Engine {
 		"admin": "secret",
 	}), api.GetResource)
 	router.POST("/login", api.GetAuth)
-	public := router.Group("/socket")
-	public.GET("", SocketHandler)
+
+	router.GET("/ws", primary.Start)
 
 	apiv1 := router.Group("/api/v1")
 	apiv1.Use(AuthRequired)

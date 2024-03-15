@@ -2,7 +2,6 @@ package conf
 
 /*參數説明
 app.port // 應用端口
-app.serve_type // 默認請使用GoServe
 app.debug_mod // 開發模式建議設置為`true` 避免修改靜態資源需要重啓服務
 database.dsn // postgresql 連接地址dsn
 */
@@ -11,7 +10,6 @@ var AppJsonConfig = []byte(`
 {
   "app": {
     "port": "8888",
-    "serve_type": "GoServe",
     "debug_mod": "true"
   },
   "database": {
